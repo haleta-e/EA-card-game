@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { Theme, Level, LessonPack, themes, Card, generateDeck, generateQuestion, Question } from '@/lib/game-data'
 import { PyramidLayout } from './pyramid-layout'
 import { GameSidebar } from './game-sidebar'
+import { GameIntro } from './game-intro'
 import { SettingsPanel } from './settings-panel'
 import { HowToPlayModal } from './how-to-play-modal'
 import { WinScreen } from './win-screen'
@@ -68,6 +69,7 @@ function updateStreak(): number {
 
 export function CardGame() {
   const [mounted, setMounted] = useState(false)
+  const [showIntro, setShowIntro] = useState(true)
   const [currentTheme, setCurrentTheme] = useState<Theme>('panda')
   const [currentLevel, setCurrentLevel] = useState<Level>('easy')
   const [lessonPack, setLessonPack] = useState<LessonPack>('mixed')
@@ -238,6 +240,13 @@ export function CardGame() {
           <p className="text-gray-600 font-medium">Loading game...</p>
         </div>
       </div>
+    )
+  }
+
+  // Show intro screen on first visit
+  if (showIntro) {
+    return (
+      <GameIntro onStart={() => setShowIntro(false)} />
     )
   }
 
