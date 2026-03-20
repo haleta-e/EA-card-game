@@ -59,7 +59,7 @@ export const themes: Record<Theme, ThemeConfig> = {
     name: 'Panda',
     icon: '🐼',
     reward: '🎋',
-    background: 'https://i.pinimg.com/736x/d0/07/04/d007043d0e0ebec1d95b1d5b03bb1b7.jpg',
+    background: 'https://i.pinimg.com/736x/5e/4f/34/5e4f34d6dd1077e7404653425d2582cf.jpg',
     cardFront: 'https://i.pinimg.com/1200x/49/57/2c/49572cf1e0d41fd0f9a20e9621dcd8ac.jpg',
     cardBack: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
     primaryColor: '#22c55e',
