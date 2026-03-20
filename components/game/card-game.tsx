@@ -241,18 +241,9 @@ export function CardGame() {
     )
   }
 
-  // Handle first user interaction to enable music playback (browser autoplay policy)
-  const handleUserInteraction = useCallback(() => {
-    if (musicEnabled) {
-      startMusic(currentTheme)
-    }
-  }, [musicEnabled, currentTheme, startMusic])
-
   return (
     <div 
-      className="min-h-screen w-full bg-cover bg-center bg-fixed transition-all duration-500 cursor-pointer"
-      onClick={handleUserInteraction}
-      onTouchStart={handleUserInteraction}
+      className="min-h-screen w-full bg-cover bg-center bg-fixed transition-all duration-500"
       style={{ 
         backgroundImage: `url(${theme.background})`,
       }}
