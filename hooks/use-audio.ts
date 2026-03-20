@@ -2,21 +2,41 @@
 
 import { useRef, useCallback, useEffect } from 'react'
 
+/**
+ * Audio System for Kids Card Game
+ * Features:
+ * - Sound effects for game events (flip, correct, wrong, collect, win)
+ * - Theme-specific background music with volume control
+ * - Text-to-speech for learning content
+ * - Browser autoplay policy handling
+ */
+
 // Free sound URLs from freesound.org (creative commons)
+// Kid-friendly sound effects for learning game
+// Audio cues are played at key moments:
+// - flip: When a card reveals correct learning content
+// - correct: Reserved for future use (ding sound)
+// - wrong: When user selects wrong card
+// - collect: When card is collected after learning content display
+// - win: When all cards are collected (game won)
 const SOUND_URLS = {
-  correct: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3',
-  wrong: 'https://cdn.freesound.org/previews/142/142608_1840739-lq.mp3',
-  flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3',
-  win: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
-  collect: 'https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3',
+  correct: 'https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3', // Ding sound for correct answer
+  wrong: 'https://cdn.freesound.org/previews/142/142608_1840739-lq.mp3', // Gentle buzzer for wrong answer
+  flip: 'https://cdn.freesound.org/previews/240/240776_4107740-lq.mp3', // Card flip sound when learning content shows
+  win: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3', // Celebratory win chime
+  collect: 'https://cdn.freesound.org/previews/320/320655_5260872-lq.mp3', // Reward collection sound
 }
 
-// Background music URLs (royalty-free from freepd.com / creative commons)
+// Background music URLs (royalty-free from freesound.org / creative commons)
+// Theme-specific uplifting, kid-friendly music that plays when Music toggle is ON
+// Each theme has distinct music to enhance immersion and learning experience
+// Music volume is set to 30% of overall volume (quieter than sound effects)
+// Music auto-starts on first user interaction (click/touch) to comply with browser policies
 const MUSIC_URLS = {
-  panda: 'https://cdn.freesound.org/previews/457/457921_4166233-lq.mp3',
-  bunny: 'https://cdn.freesound.org/previews/457/457921_4166233-lq.mp3',
-  lion: 'https://cdn.freesound.org/previews/457/457921_4166233-lq.mp3',
-  monkey: 'https://cdn.freesound.org/previews/457/457921_4166233-lq.mp3',
+  panda: 'https://cdn.freesound.org/previews/457/457898_4166233-lq.mp3', // Peaceful bamboo forest vibe
+  bunny: 'https://cdn.freesound.org/previews/457/457921_4166233-lq.mp3', // Bouncy, cheerful
+  lion: 'https://cdn.freesound.org/previews/457/457908_4166233-lq.mp3', // Adventurous, bold
+  monkey: 'https://cdn.freesound.org/previews/457/457925_4166233-lq.mp3', // Playful, energetic
 }
 
 export type SoundType = keyof typeof SOUND_URLS
@@ -74,11 +94,16 @@ export function useAudio() {
     const audio = new Audio(MUSIC_URLS[theme])
     audio.loop = true
     audio.volume = volumeRef.current * 0.3 // Music quieter than sfx
+    audio.crossOrigin = 'anonymous'
     musicRef.current = audio
     
-    audio.play().catch(() => {
-      // Ignore autoplay errors - user needs to interact first
-    })
+    // Try to play, with graceful fallback
+    const playPromise = audio.play()
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // User interaction required for autoplay - will be triggered on first interaction
+      })
+    }
   }, [])
 
   const stopMusic = useCallback(() => {
