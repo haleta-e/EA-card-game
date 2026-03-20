@@ -56,7 +56,7 @@ export function SettingsPanel({
     { value: 'normal', label: 'Normal' },
     { value: 'hard', label: 'Hard' },
   ]
-  const lessonPackOptions: LessonPack[] = ['mixed', 'letters', 'colors', 'shapes', 'animals', 'numbers']
+  const lessonPackOptions: LessonPack[] = ['mixed', 'letters', 'colors', 'shapes', 'animals', 'numbers', 'math', 'vocabulary', 'opposites', 'concepts']
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -132,13 +132,13 @@ export function SettingsPanel({
             "text-sm font-medium",
             nightMode ? "text-gray-300" : "text-gray-700"
           )}>Lesson Pack</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto">
             {lessonPackOptions.map((pack) => (
               <button
                 key={pack}
                 onClick={() => onLessonPackChange(pack)}
                 className={cn(
-                  'flex flex-col items-center gap-1 p-2 rounded-xl transition-all text-xs',
+                  'flex flex-col items-center gap-0.5 p-1.5 rounded-lg transition-all text-xs',
                   lessonPack === pack
                     ? 'text-white scale-105 shadow-lg'
                     : nightMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -147,8 +147,8 @@ export function SettingsPanel({
                   background: lessonPack === pack ? themes[theme].primaryColor : undefined,
                 }}
               >
-                <span className="text-lg">{lessonPacks[pack].icon}</span>
-                <span className="font-medium">{lessonPacks[pack].name}</span>
+                <span className="text-base">{lessonPacks[pack].icon}</span>
+                <span className="font-medium text-[10px] text-center leading-tight">{lessonPacks[pack].name}</span>
               </button>
             ))}
           </div>

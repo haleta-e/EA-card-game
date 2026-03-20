@@ -39,7 +39,7 @@ export interface Question {
   checkAnswer: (card: Card) => boolean
 }
 
-export type LessonPack = 'mixed' | 'letters' | 'colors' | 'shapes' | 'animals' | 'numbers'
+export type LessonPack = 'mixed' | 'letters' | 'colors' | 'shapes' | 'animals' | 'numbers' | 'math' | 'vocabulary' | 'opposites' | 'concepts'
 
 export const lessonPacks: Record<LessonPack, { name: string; icon: string }> = {
   mixed: { name: 'Mixed', icon: '🎲' },
@@ -48,6 +48,10 @@ export const lessonPacks: Record<LessonPack, { name: string; icon: string }> = {
   shapes: { name: 'Shapes', icon: '🔷' },
   animals: { name: 'Animals', icon: '🐾' },
   numbers: { name: 'Numbers', icon: '🔢' },
+  math: { name: 'Math', icon: '➕' },
+  vocabulary: { name: 'Vocabulary', icon: '📚' },
+  opposites: { name: 'Opposites', icon: '⬌' },
+  concepts: { name: 'Concepts', icon: '💡' },
 }
 
 export const themes: Record<Theme, ThemeConfig> = {
@@ -160,6 +164,48 @@ const normalContent = [
   { text: 'Little Mouse', icon: '🐭', type: 'concept' as const },
 ]
 
+// Math content
+const mathContent = [
+  { text: '1 + 1 = 2', icon: '🔢', type: 'concept' as const },
+  { text: '2 + 2 = 4', icon: '🔢', type: 'concept' as const },
+  { text: '3 + 1 = 4', icon: '🔢', type: 'concept' as const },
+  { text: '2 + 1 = 3', icon: '🔢', type: 'concept' as const },
+  { text: '5 - 1 = 4', icon: '➖', type: 'concept' as const },
+  { text: '3 - 1 = 2', icon: '➖', type: 'concept' as const },
+]
+
+// Vocabulary content
+const vocabularyContent = [
+  { text: 'Jump', icon: '🦘', type: 'word' as const },
+  { text: 'Sleep', icon: '😴', type: 'word' as const },
+  { text: 'Eat', icon: '🍽️', type: 'word' as const },
+  { text: 'Play', icon: '🎮', type: 'word' as const },
+  { text: 'Run', icon: '🏃', type: 'word' as const },
+  { text: 'Sing', icon: '🎵', type: 'word' as const },
+  { text: 'Dance', icon: '💃', type: 'word' as const },
+  { text: 'Read', icon: '📖', type: 'word' as const },
+]
+
+// Opposites content
+const oppositesContent = [
+  { text: 'Big & Small', icon: '🐘', type: 'concept' as const, subIcon: '🐁' },
+  { text: 'Hot & Cold', icon: '🔥', type: 'concept' as const, subIcon: '❄️' },
+  { text: 'Happy & Sad', icon: '😊', type: 'concept' as const, subIcon: '😢' },
+  { text: 'Fast & Slow', icon: '🐇', type: 'concept' as const, subIcon: '🐢' },
+  { text: 'Up & Down', icon: '⬆️', type: 'concept' as const, subIcon: '⬇️' },
+  { text: 'Light & Dark', icon: '☀️', type: 'concept' as const, subIcon: '🌙' },
+]
+
+// Matching concepts content
+const conceptsContent = [
+  { text: 'Square + Blue', icon: '🔵', type: 'concept' as const, subIcon: '⬛' },
+  { text: 'Triangle + Red', icon: '🔴', type: 'concept' as const, subIcon: '🔺' },
+  { text: 'Circle + Yellow', icon: '🟡', type: 'concept' as const, subIcon: '⭕' },
+  { text: 'Heart + Pink', icon: '💗', type: 'concept' as const, subIcon: '💖' },
+  { text: 'Star + Gold', icon: '⭐', type: 'concept' as const, subIcon: '✨' },
+  { text: 'Diamond + Purple', icon: '🟪', type: 'concept' as const, subIcon: '💎' },
+]
+
 // Hard content with multiple concepts combined
 const hardContent = [
   { text: 'Red + Triangle', icon: '🔺', type: 'concept' as const, subIcon: '🔴' },
@@ -179,59 +225,79 @@ const hardContent = [
   { text: 'Triangle has 3 sides', icon: '🔺', type: 'concept' as const },
 ]
 
+// Anti-repetition tracking - prevent duplicate content
+const recentContent = new Map<string, string[]>()
+
+function getContentPool(pack: LessonPack): Array<{ text: string; icon: string; type: string; subIcon?: string }> {
+  switch (pack) {
+    case 'letters':
+      return letters.map(l => ({ text: l, icon: '🔤', type: 'letter' }))
+    case 'colors':
+      return colors.map(c => ({ text: c.text, icon: c.icon, type: 'color' }))
+    case 'shapes':
+      return shapes.map(s => ({ text: s.text, icon: s.icon, type: 'shape' }))
+    case 'animals':
+      return animals.map(a => ({ text: a.text, icon: a.icon, type: 'animal' }))
+    case 'numbers':
+      return numbers.map(n => ({ text: n.text, icon: n.icon, type: 'concept' }))
+    case 'math':
+      return mathContent
+    case 'vocabulary':
+      return vocabularyContent
+    case 'opposites':
+      return oppositesContent
+    case 'concepts':
+      return conceptsContent
+    case 'mixed':
+    default:
+      return []
+  }
+}
+
+function getRandomWithAntiRepetition(pool: Array<any>, packKey: string, maxRecent: number = 5): any {
+  if (!recentContent.has(packKey)) {
+    recentContent.set(packKey, [])
+  }
+  
+  const recent = recentContent.get(packKey) || []
+  const available = pool.filter(item => !recent.includes(item.text))
+  
+  const item = available.length > 0 
+    ? available[Math.floor(Math.random() * available.length)]
+    : pool[Math.floor(Math.random() * pool.length)]
+  
+  // Update recent tracking
+  recent.unshift(item.text)
+  if (recent.length > maxRecent) recent.pop()
+  recentContent.set(packKey, recent)
+  
+  return item
+}
+
 export function getRandomLearningContent(level: Level, lessonPack: LessonPack = 'mixed'): LearningContent {
   // For specific lesson packs, always use that content
   if (lessonPack !== 'mixed') {
-    switch (lessonPack) {
-      case 'letters': {
-        const letter = letters[Math.floor(Math.random() * letters.length)]
-        return { text: letter, icon: '🔤', type: 'letter' }
-      }
-      case 'colors': {
-        const color = colors[Math.floor(Math.random() * colors.length)]
-        return { text: color.text, icon: color.icon, type: 'color' }
-      }
-      case 'shapes': {
-        const shape = shapes[Math.floor(Math.random() * shapes.length)]
-        return { text: shape.text, icon: shape.icon, type: 'shape' }
-      }
-      case 'animals': {
-        const animal = animals[Math.floor(Math.random() * animals.length)]
-        return { text: animal.text, icon: animal.icon, type: 'animal' }
-      }
-      case 'numbers': {
-        const num = numbers[Math.floor(Math.random() * numbers.length)]
-        return { text: num.text, icon: num.icon, type: 'concept' }
-      }
+    const pool = getContentPool(lessonPack)
+    if (pool.length > 0) {
+      const item = getRandomWithAntiRepetition(pool, lessonPack)
+      return { text: item.text, icon: item.icon, type: item.type as any, subIcon: item.subIcon }
     }
   }
 
-  // Mixed content based on level
+  // Mixed content based on level with anti-repetition
   if (level === 'easy') {
-    const contentType = Math.floor(Math.random() * 5)
-    if (contentType === 0) {
-      const letter = letters[Math.floor(Math.random() * letters.length)]
-      return { text: letter, icon: '🔤', type: 'letter' }
-    } else if (contentType === 1) {
-      const color = colors[Math.floor(Math.random() * colors.length)]
-      return { text: color.text, icon: color.icon, type: 'color' }
-    } else if (contentType === 2) {
-      const shape = shapes[Math.floor(Math.random() * shapes.length)]
-      return { text: shape.text, icon: shape.icon, type: 'shape' }
-    } else if (contentType === 3) {
-      const animal = animals[Math.floor(Math.random() * animals.length)]
-      return { text: animal.text, icon: animal.icon, type: 'animal' }
-    } else {
-      const num = numbers[Math.floor(Math.random() * numbers.length)]
-      return { text: num.text, icon: num.icon, type: 'concept' }
-    }
+    const packs: LessonPack[] = ['letters', 'colors', 'shapes', 'animals', 'numbers']
+    const selectedPack = packs[Math.floor(Math.random() * packs.length)]
+    const pool = getContentPool(selectedPack)
+    const item = getRandomWithAntiRepetition(pool, `easy-${selectedPack}`)
+    return { text: item.text, icon: item.icon, type: item.type as any, subIcon: item.subIcon }
   } else if (level === 'normal') {
-    const content = normalContent[Math.floor(Math.random() * normalContent.length)]
-    return { text: content.text, icon: content.icon, type: content.type }
+    const content = getRandomWithAntiRepetition(normalContent, 'normal')
+    return { text: content.text, icon: content.icon, type: content.type, subIcon: content.subIcon }
   } else {
     // Hard level - multiple concepts
-    const content = hardContent[Math.floor(Math.random() * hardContent.length)]
-    return { text: content.text, icon: content.icon, type: content.type }
+    const content = getRandomWithAntiRepetition(hardContent, 'hard')
+    return { text: content.text, icon: content.icon, type: content.type, subIcon: content.subIcon }
   }
 }
 
